@@ -1,0 +1,22 @@
+---
+title: "LMB_sandbox"
+author: "Leroy Bondhus"
+date: "10/5/2022"
+output: html_document
+---
+
+
+```{r, load libraries}
+library(stringr)
+```
+
+```{r, create directory structure for project}
+dirs <- list(data_dir = "./data",
+             results_dir = "./results",
+             figures_dir = "./results/figures",
+             tables_dir = "./results/tables")
+for(d in dirs){
+  if(!dir.exists(d)){dir.create(d)}
+}
+date <- format(Sys.time(),"%Y%m%d")
+```
