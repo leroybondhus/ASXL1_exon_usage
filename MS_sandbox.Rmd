@@ -4,25 +4,69 @@ output: html_document
 date: '2022-10-12'
 ---
 
+library(ggplot2)
+
+# import gtex data
+
+temp <- tempfile()
+download.file("https://storage.googleapis.com/gtex_analysis_v9/long_read_data/quantification_gencode.tpm.txt.gz",temp)
+gtex <- read.table(temp, skip=0, header = TRUE, sep = "\t")
+gtex_rowinfo <- data.frame(Name=gtex$Name, Description=gtex$Description)
+rownames(gtex) <- gtex$transcript
+
+---
+
 # boxplot
 
+# boxplot that compares the distribution of transcript expression of 2 gene samples
 
+# with outliers
+boxplot(gtex$GTEX.1192X.0011.R10a.SM.4RXXZ, gtex$GTEX.11H98.0011.R11b.SM.4SFLZ,
+main = "Quantification of transcripts \n in two gene samples \n (with outliers)",
+xlab = "Sample ID",
+ylab = "Quantification in TPM",
+outline = TRUE
+)
+
+legend("topright" legend=c("GTEX.1192X.0011.R10a.SM.4RXXZ", "GTEX.11H98.0011.R11b.SM.4SFLZ"), 
+       fill = c("blue","red")
+)
+
+
+# without outliers
+boxplot(gtex$GTEX.1192X.0011.R10a.SM.4RXXZ, gtex$GTEX.11H98.0011.R11b.SM.4SFLZ,
+main = "Quantification of transcripts \n in two samples \n "without outliers",
+xlab = "Sample ID",
+ylab = "Quantification in TPM",
+outline = FALSE
+)
+
+legend("topright", legend=c("GTEX.1192X.0011.R10a.SM.4RXXZ", "GTEX.11H98.0011.R11b.SM.4SFLZ"), 
+       fill = c("blue","red")
+)
 
 ---
 
 # volcano plot
 
+download.file("https://raw.githubusercontent.com/biocorecrg/CRG_RIntroduction/master/de_df_for_volcano.rds", "de_df_for_volcano.rds", method="curl")
 
 
 ---
 
 # scatterplot
 
+# plot(data = gtex$GTEX.11H98.0011.R11b.SM.4SFLZ)
 
 ---
 
 # histogram
 # for colour scheme, val typically prefers greyscale. or, this red/blue combo she seems fine with too
+
+hist(gtex$GTEX.11H98.0011.R11b.SM.4SFLZ, breaks=10,
+main = "Frequency of quantifications in sample \n GTEX.11H98.0011.R11b.SM.4SFLZ", 
+xlab = "Quantification in TPM", ylab = "Frequency",
+xlim = c(0,3000))
 
 
 
