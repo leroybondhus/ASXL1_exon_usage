@@ -1,0 +1,88 @@
+---
+title: "MS_sandbox"
+output: html_document
+date: '2022-10-12'
+---
+
+```{r}
+
+library(ggplot2)
+# library(tidyverse)
+library(reshape)
+
+# import gtex data
+
+temp <- tempfile()
+download.file("https://storage.googleapis.com/gtex_analysis_v9/long_read_data/quantification_gencode.tpm.txt.gz", temp)
+gtex <- read.table(temp, skip=0, header = TRUE, sep = "\t")
+gtex_rowinfo <- data.frame(Name=gtex$Name, Description=gtex$Description)
+rownames(gtex) <- gtex$transcript
+
+dirs <- list(data="./data/",
+             results="./results/",
+             tables="./tables/",
+             figures="./figures/")
+for(d in dirs){
+  print(d)
+  if(!dir.exists(d)){dir.create(d)}
+  print(dir.exists(d))
+}
+dir.exists(dirs$tables)
+date <- format(Sys.time(), "%Y%m%d")
+
+```
+
+
+```{r}
+ggp_list <- list()
+
+# create data frame to organize variables
+df <- data.frame(GTEX.1192X.0011.R10a.SM.4RXXZ = gtex$GTEX.1192X.0011.R10a.SM.4RXXZ,
+                 GTEX.11H98.0011.R11b.SM.4SFLZ = gtex$GTEX.11H98.0011.R11b.SM.4SFLZ)
+# sort data
+df <- melt(df)
+
+# boxplot that compares the distribution of transcript expression of 2 gene samples
+ggp_list$boxplot <- ggplot(data = df, mapping = aes(x = variable, y = log10(value))) + 
+  geom_boxplot() + 
+  labs(x = "Sample ID",
+       y = "Quantification (log(TPM))", 
+       title = "Distribution for Transcript Expression for Two Gene Samples")
+
+```
+
+
+```{r}
+
+# scatterplot comparing the expression of each transcript for 2 gene samples
+
+ggp_list$scatterplot <- ggplot(point_df, mapping = aes(x = log10(gtex$GTEX.1192X.0011.R10a.SM.4RXXZ), 
+                               y = log10(gtex$GTEX.11H98.0011.R11b.SM.4SFLZ))) + 
+  geom_point(size = 0.5) + 
+  labs(x = "GTEX.1192X.0011.R10a.SM.4RXXZ (log(TPM))", 
+       y = "GTEX.11H98.0011.R11b.SM.4SFLZ (log(TPM))",
+       title = "Comparing Transcript Expression for Two Gene Samples") +
+  geom_smooth(method = 'lm')
+
+
+```
+
+
+```{r}
+
+# histogram
+
+hist_df <- data.frame(value = gtex$GTEX.1192X.0011.R10a.SM.4RXXZ)
+
+ggp_list$histogram <- ggplot(hist_df, aes(x = log10(value))) + 
+  geom_histogram() +
+  labs(x = "Quantification (log(TPM))", y = "Frequency",
+       title = "Frequency of transcript quantifications in a genotype sample")
+?ggsave
+for(i in 1:length(ggp_list)){
+  ggsave(paste0(dirs$figures, date,"_", names(ggp_list)[i], ".png"),
+         ggp_list[[i]], device = "png")
+}
+
+```
+
